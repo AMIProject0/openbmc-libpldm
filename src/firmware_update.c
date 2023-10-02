@@ -913,6 +913,81 @@ int encode_request_update_req(uint8_t instance_id, uint32_t max_transfer_size,
 }
 
 LIBPLDM_ABI_STABLE
+int decode_request_update_req(const struct pldm_msg *msg,
+						size_t payload_length, uint8_t *completion_code,
+						uint32_t *max_transfer_size, uint16_t *num_of_comp,
+						uint8_t *max_outstanding_transfer_req, uint16_t *pkg_data_len,
+						uint8_t *comp_image_set_ver_str_type, uint8_t *comp_image_set_ver_str_len,
+						struct variable_field *comp_img_set_ver_str)
+{
+	if (msg == NULL || completion_code == NULL || max_transfer_size == NULL ||
+		num_of_comp == NULL || max_outstanding_transfer_req == NULL ||
+		pkg_data_len == NULL || comp_image_set_ver_str_type == NULL ||
+		comp_image_set_ver_str_len == NULL || comp_img_set_ver_str == NULL ||
+		!payload_length) {
+			return PLDM_ERROR_INVALID_DATA;
+		}
+
+		*completion_code = msg->payload[0];
+		if (*completion_code != PLDM_SUCCESS) {
+			return PLDM_ERROR;
+		}
+
+		if (payload_length != sizeof(struct pldm_request_update_req)) {
+			return PLDM_ERROR_INVALID_LENGTH;
+		}
+
+		struct pldm_request_update_req *request = 
+			(struct pldm_request_update_req *)msg->payload;
+
+		*max_transfer_size = le32toh(request->max_transfer_size);
+		*num_of_comp = le16toh(request->num_of_comp);
+		*max_outstanding_transfer_req = request->max_outstanding_transfer_req;
+		*pkg_data_len = le16toh(request->pkg_data_len);
+		*comp_image_set_ver_str_type = request->comp_image_set_ver_str_type;
+		*comp_image_set_ver_str_len = request->comp_image_set_ver_str_len;
+		comp_img_set_ver_str->length = request->comp_image_set_ver_str_len;
+		comp_img_set_ver_str->ptr = (const uint8_t*)(msg->payload + sizeof (struct pldm_request_update_req));
+
+		return PLDM_SUCCESS;
+}
+
+LIBPLDM_ABI_STABLE
+int encode_request_update_resp(uint8_t instance_id, 
+						uint16_t fd_meta_data_len, 
+						uint8_t fd_will_send_pkg_data, 
+						struct pldm_msg *msg,
+						size_t payload_length)
+{
+	if (msg == NULL) {
+		return PLDM_ERROR_INVALID_DATA;
+	}
+
+	if (payload_length != sizeof(struct pldm_request_update_req)) {
+		return PLDM_ERROR_INVALID_LENGTH;
+	}
+
+	struct pldm_header_info header = { 0 };
+	header.instance = instance_id;
+	header.msg_type = PLDM_RESPONSE;
+	header.pldm_type = PLDM_FWUP;
+	header.command = PLDM_REQUEST_UPDATE;
+	uint8_t rc = pack_pldm_header(&header, &(msg->hdr));
+	if (!rc) {
+		return rc;
+	}
+
+	struct pldm_request_update_resp *response =
+		(struct pldm_request_update_resp *)msg->payload;
+
+	response->fd_meta_data_len = htole16(fd_meta_data_len);
+	response->fd_will_send_pkg_data = fd_will_send_pkg_data;
+
+	return PLDM_SUCCESS;
+
+}
+
+LIBPLDM_ABI_STABLE
 int decode_request_update_resp(const struct pldm_msg *msg,
 			       size_t payload_length, uint8_t *completion_code,
 			       uint16_t *fd_meta_data_len,

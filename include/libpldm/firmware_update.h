@@ -814,7 +814,8 @@ int decode_request_update_req(const struct pldm_msg *msg,
 
 int encode_request_update_resp(uint8_t instance_id, 
 						uint16_t fd_meta_data_len, 
-						uint8_t fd_will_send_pkg_data, 
+						uint8_t fd_will_send_pkg_data,
+						uint8_t completion_code, 
 						struct pldm_msg *msg,
 						size_t payload_length);
 

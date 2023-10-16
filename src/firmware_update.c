@@ -933,7 +933,7 @@ int decode_request_update_req(const struct pldm_msg *msg,
 			return PLDM_ERROR;
 		}
 
-		if (payload_length != sizeof(struct pldm_request_update_req)) {
+		if (payload_length > sizeof(struct pldm_request_update_req) + sizeof (struct variable_field)) {
 			return PLDM_ERROR_INVALID_LENGTH;
 		}
 
@@ -955,7 +955,8 @@ int decode_request_update_req(const struct pldm_msg *msg,
 LIBPLDM_ABI_STABLE
 int encode_request_update_resp(uint8_t instance_id, 
 						uint16_t fd_meta_data_len, 
-						uint8_t fd_will_send_pkg_data, 
+						uint8_t fd_will_send_pkg_data,
+						uint8_t completion_code, 
 						struct pldm_msg *msg,
 						size_t payload_length)
 {
@@ -963,7 +964,7 @@ int encode_request_update_resp(uint8_t instance_id,
 		return PLDM_ERROR_INVALID_DATA;
 	}
 
-	if (payload_length != sizeof(struct pldm_request_update_req)) {
+	if (payload_length != sizeof(struct pldm_request_update_resp)) {
 		return PLDM_ERROR_INVALID_LENGTH;
 	}
 
@@ -973,7 +974,7 @@ int encode_request_update_resp(uint8_t instance_id,
 	header.pldm_type = PLDM_FWUP;
 	header.command = PLDM_REQUEST_UPDATE;
 	uint8_t rc = pack_pldm_header(&header, &(msg->hdr));
-	if (!rc) {
+	if (rc != 0) {
 		return rc;
 	}
 
@@ -982,6 +983,7 @@ int encode_request_update_resp(uint8_t instance_id,
 
 	response->fd_meta_data_len = htole16(fd_meta_data_len);
 	response->fd_will_send_pkg_data = fd_will_send_pkg_data;
+	response->completion_code = completion_code;
 
 	return PLDM_SUCCESS;
 

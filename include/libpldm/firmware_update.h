@@ -665,6 +665,24 @@ int encode_query_device_identifiers_req(uint8_t instance_id,
 					size_t payload_length,
 					struct pldm_msg *msg);
 
+/** @brief Encode QueryDeviceIdentifiers response message
+ * 	
+ * 	@param[in] instance_id - Message's instance id
+ * 	@param[in,out] msg - Message will be written to this
+ * 	@param[in] completion_code - pldm_completion_code
+ * 	@param[in] device_identifiers_len - Length of the descriptors
+ * 	@param[in] descriptor_count - Number of descriptors
+ * 	@param[in] descriptors - Pointer to descriptors
+ * 
+ * 	@return pldm_completion_codes
+*/
+int encode_query_device_identifiers_resp(uint8_t instance_id,
+					struct pldm_msg *msg,
+					uint8_t completion_code,
+					uint32_t device_identifiers_len,
+					uint8_t descriptor_count,
+					struct variable_field descriptors);
+
 /** @brief Decode QueryDeviceIdentifiers response message
  *
  *  @param[in] msg - Response message
@@ -697,6 +715,25 @@ int decode_query_device_identifiers_resp(const struct pldm_msg *msg,
 int encode_get_firmware_parameters_req(uint8_t instance_id,
 				       size_t payload_length,
 				       struct pldm_msg *msg);
+
+/** @brief Encode GetFirmwareParamters response
+ * 	
+ * 	@param[in] instance_id - message instance id
+ * 	@param[in,out] msg - Response message
+ *  @param[in] resp_data - firmware parameters fixed response data
+ * 	@param[in] active_comp_image_set_ver_str - active component
+ *                                             image set version string
+ * 	@param[in] pending_comp_image_set_ver_str - pending component
+ *                                              image set version string
+ * 	@param[in] comp_parameter_table - component parameter table
+ * 
+ * 	@return pldm_completion_codes
+*/
+int encode_get_firmware_parameters_resp(uint8_t instance_id, struct pldm_msg* msg,
+						struct pldm_get_firmware_parameters_resp *resp_data, 
+						struct variable_field *active_comp_image_set_ver_str,
+						struct variable_field *pending_comp_image_set_ver_str,
+						struct variable_field *comp_parameter_table);
 
 /** @brief Decode GetFirmwareParameters response
  *
@@ -795,7 +832,7 @@ int encode_request_update_req(uint8_t instance_id, uint32_t max_transfer_size,
 */ 
 
 int decode_request_update_req(const struct pldm_msg *msg,
-						size_t payload_length, uint8_t *completion_code,
+						size_t payload_length,
 						uint32_t *max_transfer_size, uint16_t *num_of_comp,
 						uint8_t *max_outstanding_transfer_req, uint16_t *pkg_data_len,
 						uint8_t *comp_image_set_ver_str_type, uint8_t *comp_image_set_ver_str_len,
@@ -1096,6 +1133,7 @@ int decode_activate_firmware_resp(const struct pldm_msg *msg,
  */
 int encode_get_status_req(uint8_t instance_id, struct pldm_msg *msg,
 			  size_t payload_length);
+
 
 /** @brief Decode GetStatus response message
  *

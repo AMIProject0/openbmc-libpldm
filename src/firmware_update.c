@@ -613,6 +613,38 @@ int encode_query_device_identifiers_req(uint8_t instance_id,
 }
 
 LIBPLDM_ABI_STABLE
+int encode_query_device_identifiers_resp(uint8_t instance_id,
+					struct pldm_msg *msg,
+					uint8_t completion_code,
+					uint32_t device_identifiers_len,
+					uint8_t descriptor_count,
+					struct variable_field descriptors)
+{
+
+	struct pldm_header_info header = { 0 };
+	header.instance = instance_id;
+	header.msg_type = PLDM_RESPONSE;
+	header.pldm_type = PLDM_FWUP;
+	header.command = PLDM_QUERY_DEVICE_IDENTIFIERS;
+	uint8_t rc = pack_pldm_header(&header, &(msg->hdr));
+	if (rc) {
+		return rc;
+	}
+
+	struct pldm_query_device_identifiers_resp *response =
+		(struct pldm_query_device_identifiers_resp *)msg->payload;
+
+	response->completion_code = completion_code;
+	response->device_identifiers_len = htole32(device_identifiers_len);
+	response->descriptor_count = descriptor_count;
+
+	memcpy(msg->payload + sizeof (struct pldm_query_device_identifiers_resp),
+			descriptors.ptr, descriptors.length);
+
+	return PLDM_SUCCESS;
+}
+
+LIBPLDM_ABI_STABLE
 int decode_query_device_identifiers_resp(const struct pldm_msg *msg,
 					 size_t payload_length,
 					 uint8_t *completion_code,
@@ -675,6 +707,44 @@ int encode_get_firmware_parameters_req(uint8_t instance_id,
 
 	return encode_pldm_header_only(PLDM_REQUEST, instance_id, PLDM_FWUP,
 				       PLDM_GET_FIRMWARE_PARAMETERS, msg);
+}
+
+LIBPLDM_ABI_STABLE
+int encode_get_firmware_parameters_resp(uint8_t instance_id, struct pldm_msg* msg,
+						struct pldm_get_firmware_parameters_resp *resp_data, 
+						struct variable_field *active_comp_image_set_ver_str,
+						struct variable_field *pending_comp_image_set_ver_str,
+						struct variable_field *comp_parameter_table)
+{
+	struct pldm_header_info header = { 0 };
+	header.instance = instance_id;
+	header.msg_type = PLDM_RESPONSE;
+	header.pldm_type = PLDM_FWUP;
+	header.command = PLDM_GET_FIRMWARE_PARAMETERS;
+	uint8_t rc = pack_pldm_header(&header, &(msg->hdr));
+	if (rc) {
+		return rc;
+	}
+
+	struct pldm_get_firmware_parameters_resp *response =
+		(struct pldm_get_firmware_parameters_resp *)msg->payload;
+
+	response->completion_code = resp_data->completion_code;
+	response->capabilities_during_update.value = htole32(resp_data->capabilities_during_update.value);
+	response->comp_count = htole16(resp_data->comp_count);
+	response->active_comp_image_set_ver_str_type = resp_data->active_comp_image_set_ver_str_type;
+	response->active_comp_image_set_ver_str_len = resp_data->active_comp_image_set_ver_str_len;
+	response->pending_comp_image_set_ver_str_type = resp_data->pending_comp_image_set_ver_str_type;
+	response->pending_comp_image_set_ver_str_len = resp_data->pending_comp_image_set_ver_str_len;
+
+
+	memcpy(msg->payload + sizeof (struct pldm_get_firmware_parameters_resp), active_comp_image_set_ver_str->ptr, active_comp_image_set_ver_str->length);
+	memcpy(msg->payload + sizeof (struct pldm_get_firmware_parameters_resp) + active_comp_image_set_ver_str->length, pending_comp_image_set_ver_str->ptr, pending_comp_image_set_ver_str->length);
+	memcpy(msg->payload + sizeof (struct pldm_get_firmware_parameters_resp) + active_comp_image_set_ver_str->length + pending_comp_image_set_ver_str->length,
+			comp_parameter_table->ptr, comp_parameter_table->length);
+
+	return PLDM_SUCCESS;
+
 }
 
 LIBPLDM_ABI_STABLE
@@ -913,60 +983,31 @@ int encode_request_update_req(uint8_t instance_id, uint32_t max_transfer_size,
 }
 
 LIBPLDM_ABI_STABLE
-int decode_request_update_req(const struct pldm_msg *msg,
-						size_t payload_length, uint8_t *completion_code,
-						uint32_t *max_transfer_size, uint16_t *num_of_comp,
-						uint8_t *max_outstanding_transfer_req, uint16_t *pkg_data_len,
-						uint8_t *comp_image_set_ver_str_type, uint8_t *comp_image_set_ver_str_len,
+int decode_request_update_req(struct pldm_msg *msg,
+						struct pldm_request_update_req *req_data,
 						struct variable_field *comp_img_set_ver_str)
 {
-	if (msg == NULL || completion_code == NULL || max_transfer_size == NULL ||
-		num_of_comp == NULL || max_outstanding_transfer_req == NULL ||
-		pkg_data_len == NULL || comp_image_set_ver_str_type == NULL ||
-		comp_image_set_ver_str_len == NULL || comp_img_set_ver_str == NULL ||
-		!payload_length) {
-			return PLDM_ERROR_INVALID_DATA;
-		}
 
-		*completion_code = msg->payload[0];
-		if (*completion_code != PLDM_SUCCESS) {
-			return PLDM_ERROR;
-		}
+	struct pldm_request_update_req *request = 
+		(struct pldm_request_update_req *)msg->payload;
 
-		if (payload_length > sizeof(struct pldm_request_update_req) + sizeof (struct variable_field)) {
-			return PLDM_ERROR_INVALID_LENGTH;
-		}
+	req_data->max_transfer_size = le32toh(request->max_transfer_size);
+	req_data->num_of_comp = le16toh(request->num_of_comp);
+	req_data->max_outstanding_transfer_req = request->max_outstanding_transfer_req;
+	req_data->pkg_data_len = le16toh(request->pkg_data_len);
+	req_data->comp_image_set_ver_str_type = request->comp_image_set_ver_str_type;
+	req_data->comp_image_set_ver_str_len = request->comp_image_set_ver_str_len;
+	comp_img_set_ver_str->length = request->comp_image_set_ver_str_len;
+	comp_img_set_ver_str->ptr = (const uint8_t*)(msg->payload + sizeof (struct pldm_request_update_req));
 
-		struct pldm_request_update_req *request = 
-			(struct pldm_request_update_req *)msg->payload;
-
-		*max_transfer_size = le32toh(request->max_transfer_size);
-		*num_of_comp = le16toh(request->num_of_comp);
-		*max_outstanding_transfer_req = request->max_outstanding_transfer_req;
-		*pkg_data_len = le16toh(request->pkg_data_len);
-		*comp_image_set_ver_str_type = request->comp_image_set_ver_str_type;
-		*comp_image_set_ver_str_len = request->comp_image_set_ver_str_len;
-		comp_img_set_ver_str->length = request->comp_image_set_ver_str_len;
-		comp_img_set_ver_str->ptr = (const uint8_t*)(msg->payload + sizeof (struct pldm_request_update_req));
-
-		return PLDM_SUCCESS;
+	return PLDM_SUCCESS;
 }
 
 LIBPLDM_ABI_STABLE
-int encode_request_update_resp(uint8_t instance_id, 
-						uint16_t fd_meta_data_len, 
-						uint8_t fd_will_send_pkg_data,
-						uint8_t completion_code, 
+int encode_request_update_resp(uint8_t instance_id,  
 						struct pldm_msg *msg,
-						size_t payload_length)
+						struct pldm_request_update_resp *resp_data)
 {
-	if (msg == NULL) {
-		return PLDM_ERROR_INVALID_DATA;
-	}
-
-	if (payload_length != sizeof(struct pldm_request_update_resp)) {
-		return PLDM_ERROR_INVALID_LENGTH;
-	}
 
 	struct pldm_header_info header = { 0 };
 	header.instance = instance_id;
@@ -981,9 +1022,9 @@ int encode_request_update_resp(uint8_t instance_id,
 	struct pldm_request_update_resp *response =
 		(struct pldm_request_update_resp *)msg->payload;
 
-	response->fd_meta_data_len = htole16(fd_meta_data_len);
-	response->fd_will_send_pkg_data = fd_will_send_pkg_data;
-	response->completion_code = completion_code;
+	response->fd_meta_data_len = htole16(resp_data->fd_meta_data_len);
+	response->fd_will_send_pkg_data = resp_data->fd_will_send_pkg_data;
+	response->completion_code = resp_data->completion_code;
 
 	return PLDM_SUCCESS;
 
@@ -1075,6 +1116,53 @@ int encode_pass_component_table_req(uint8_t instance_id, uint8_t transfer_flag,
 
 	memcpy(msg->payload + sizeof(struct pldm_pass_component_table_req),
 	       comp_ver_str->ptr, comp_ver_str->length);
+
+	return PLDM_SUCCESS;
+}
+
+LIBPLDM_ABI_STABLE
+int decode_pass_component_table_req(struct pldm_msg *msg,
+					struct pldm_pass_component_table_req *req_data,
+					struct variable_field *comp_ver_str)
+{
+	struct pldm_pass_component_table_req *request = 
+		(struct pldm_pass_component_table_req *)msg->payload;
+
+	req_data->transfer_flag = request->transfer_flag;
+	req_data->comp_classification = le16toh(request->comp_classification);
+	req_data->comp_identifier = le16toh(request->comp_identifier);
+	req_data->comp_classification_index = request->comp_classification_index;
+	req_data->comp_comparison_stamp = le32toh(request->comp_comparison_stamp);
+	req_data->comp_ver_str_type = request->comp_ver_str_type;
+	req_data->comp_ver_str_len = request->comp_ver_str_len;
+	comp_ver_str->length = req_data->comp_ver_str_len;
+	comp_ver_str->ptr = (const uint8_t *)(msg->payload + sizeof (struct pldm_pass_component_table_req));
+
+	return PLDM_SUCCESS;
+}
+
+LIBPLDM_ABI_STABLE
+int encode_pass_component_table_resp(uint8_t instance_id,
+					struct pldm_msg *msg,
+					struct pldm_pass_component_table_resp *resp_data)
+{
+	struct pldm_header_info header = { 0 };
+	header.instance = instance_id;
+	header.msg_type = PLDM_RESPONSE;
+	header.pldm_type = PLDM_FWUP;
+	header.command = PLDM_PASS_COMPONENT_TABLE;
+	uint8_t rc = pack_pldm_header(&header, &(msg->hdr));
+	if (rc) {
+		return rc;
+	}
+
+
+	struct pldm_pass_component_table_resp *response = 
+		(struct pldm_pass_component_table_resp *)msg->payload;
+
+	response->completion_code = resp_data->completion_code;
+	response->comp_resp = resp_data->comp_resp;
+	response->comp_resp_code = resp_data->comp_resp_code;
 
 	return PLDM_SUCCESS;
 }
@@ -1172,6 +1260,55 @@ int encode_update_component_req(
 
 	memcpy(msg->payload + sizeof(struct pldm_update_component_req),
 	       comp_ver_str->ptr, comp_ver_str->length);
+
+	return PLDM_SUCCESS;
+}
+
+LIBPLDM_ABI_STABLE
+int decode_update_component_req(struct pldm_msg *msg,
+				struct pldm_update_component_req *req_data,
+				struct variable_field *comp_ver_str)
+{
+	struct pldm_update_component_req *request =
+		(struct pldm_update_component_req *)msg->payload;
+
+	req_data->comp_classification = le16toh(request->comp_classification);
+	req_data->comp_identifier = le16toh(request->comp_identifier);
+	req_data->comp_classification_index = request->comp_classification_index;
+	req_data->comp_comparison_stamp = le32toh(request->comp_comparison_stamp);
+	req_data->comp_image_size = le32toh(request->comp_image_size);
+	req_data->update_option_flags.value = le32toh(request->update_option_flags.value);
+	req_data->comp_ver_str_type = request->comp_ver_str_type;
+	req_data->comp_ver_str_len = request->comp_ver_str_len;
+	comp_ver_str->length = req_data->comp_ver_str_len;
+	comp_ver_str->ptr = (const uint8_t *)(msg->payload + sizeof (struct pldm_update_component_req));
+
+	return PLDM_SUCCESS;
+}
+
+LIBPLDM_ABI_STABLE
+int encode_update_component_resp(uint8_t instance_id,
+				struct pldm_msg *msg,
+				struct pldm_update_component_resp *resp_data)
+{
+	struct pldm_header_info header = { 0 };
+	header.instance = instance_id;
+	header.msg_type = PLDM_RESPONSE;
+	header.pldm_type = PLDM_FWUP;
+	header.command = PLDM_UPDATE_COMPONENT;
+	uint8_t rc = pack_pldm_header(&header, &(msg->hdr));
+	if (rc) {
+		return rc;
+	}
+
+	struct pldm_update_component_resp *response = 
+		(struct pldm_update_component_resp *)msg->payload;
+
+	response->completion_code = resp_data->completion_code;
+	response->comp_compatibility_resp = resp_data->comp_compatibility_resp;
+	response->comp_compatibility_resp_code = resp_data->comp_compatibility_resp_code;
+	response->update_option_flags_enabled.value = htole32(resp_data->update_option_flags_enabled.value);
+	response->time_before_req_fw_data = htole16(resp_data->time_before_req_fw_data);
 
 	return PLDM_SUCCESS;
 }
@@ -1504,6 +1641,7 @@ int encode_get_status_req(uint8_t instance_id, struct pldm_msg *msg,
 
 	return PLDM_SUCCESS;
 }
+
 
 LIBPLDM_ABI_STABLE
 int decode_get_status_resp(const struct pldm_msg *msg, size_t payload_length,

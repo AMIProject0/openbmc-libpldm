@@ -811,50 +811,26 @@ int encode_request_update_req(uint8_t instance_id, uint32_t max_transfer_size,
 /** @brief Decode a RequestUpdate request message
  * 
  *  @param[in] msg - Request message
- *  @param[in] payload_length - Length of response message payload
- *  @param[out] completion_code - Pointer to hold the completion code
- *  @param[out] max_transfer - Pointer to maximum size of the variable payload allowed
- *                                 to be requested via RequestFirmwareData
- *                                 command
- *  @param[out] num_of_comp - Pointer to total number of components that will be passed to
- *                           the FD during the update
- *  @param[out] max_outstanding_transfer_req - Pointer to total number of outstanding
- * 											  RequestFirmwareData commands that can be sent by the FD
- *  @param[out] pkg_data_len - Pointer to value of the FirmwareDevicePackageDataLength field
- *                            present in firmware package header
- *  @param[out] comp_image_set_ver_str_type - Pointer to StringType of
- *                                           ComponentImageSetVersionString
- *  @param[out] comp_image_set_ver_str_len - Pointer to the length of the
- *                                          ComponentImageSetVersionString
+ *  @param[out] req_data - Pointer to request message data
  *  @param[out] comp_img_set_ver_str - Pointer to Component Image Set version information
  * 
  *  @return pldm_completion_codes
 */ 
-
-int decode_request_update_req(const struct pldm_msg *msg,
-						size_t payload_length,
-						uint32_t *max_transfer_size, uint16_t *num_of_comp,
-						uint8_t *max_outstanding_transfer_req, uint16_t *pkg_data_len,
-						uint8_t *comp_image_set_ver_str_type, uint8_t *comp_image_set_ver_str_len,
+int decode_request_update_req(struct pldm_msg *msg,
+						struct pldm_request_update_req *req_data,
 						struct variable_field *comp_img_set_ver_str);
 
 /** @brief Encode a RequestUpdate response message
  *  
  * 	@param[in] instance_id - Message's instance id
- *  @param[in] fd_meta_data_len - length of metadata that the FD needs the UA to retain during the firmware update process
- *  @param[in] fd_will_send_pkg_data - hold information whether FD will send GetPackageData command
  *  @param[in,out] msg - Message will be written to this
- *  @param[in] payload_length - Length of request message payload
- * 
- * @return pldm_completion_codes
+ * 	@param[in] resp_data - Request update response data
+ *  
+ * 	@return pldm_completion_codes
 */
-
 int encode_request_update_resp(uint8_t instance_id, 
-						uint16_t fd_meta_data_len, 
-						uint8_t fd_will_send_pkg_data,
-						uint8_t completion_code, 
 						struct pldm_msg *msg,
-						size_t payload_length);
+						struct pldm_request_update_resp *resp_data);
 
 /** @brief Decode a RequestUpdate response message
  *
@@ -900,6 +876,30 @@ int encode_pass_component_table_req(
 	const struct variable_field *comp_ver_str, struct pldm_msg *msg,
 	size_t payload_length);
 
+/** @brief Decode PassComponentTable request messsage
+ * 
+ * 	@param[in] msg - Request message
+ * 	@param[out] req_data - Pointer to component table data
+ * 	@param[out] comp_ver_str - Pointer to ComponentVersionString 
+ * 
+ * 	@return pldm_completion_codes
+*/
+int decode_pass_component_table_req(struct pldm_msg *msg,
+					struct pldm_pass_component_table_req *req_data,
+					struct variable_field *comp_ver_str);
+
+/** @brief Encode PassComponentTable response message
+ * 
+ * 	@param[in] instance_id - Messages's instance id
+ * 	@param[in,out] msg - Response message
+ * 	@param[in] resp_data - PassComponentTable response data
+ * 
+ * 	@return pldm_completion_codes
+*/
+int encode_pass_component_table_resp(uint8_t instance_id,
+					struct pldm_msg *msg,
+					struct pldm_pass_component_table_resp *resp_data);
+
 /** @brief Decode PassComponentTable response message
  *
  *  @param[in] msg - Response message
@@ -944,6 +944,30 @@ int encode_update_component_req(
 	bitfield32_t update_option_flags, uint8_t comp_ver_str_type,
 	uint8_t comp_ver_str_len, const struct variable_field *comp_ver_str,
 	struct pldm_msg *msg, size_t payload_length);
+
+/** @brief Decode UpdateComponent request message
+ * 
+ * 	@param[in] msg - Request message
+ * 	@param[out] req_data - Pointer to UpdateComponent request data
+ * 	@param[out] comp_ver_str - Pointer to ComponentVersionString
+ * 
+ * 	@return pldm_completion_codes
+*/
+int decode_update_component_req(struct pldm_msg *msg,
+				struct pldm_update_component_req *req_data,
+				struct variable_field *comp_ver_str);
+
+/** @brief Encode UpdateComponent response message
+ * 
+ * 	@param[in] instance_id - Message's instance id
+ * 	@param[in,out] msg - Response message
+ * 	@param[in] resp_data - Pointer to UpdateComponent response data
+ * 	
+ * 	@return pldm_completion_codes
+*/
+int encode_update_component_resp(uint8_t instance_id,
+				struct pldm_msg *msg,
+				struct pldm_update_component_resp *resp_data);
 
 /** @brief Decode UpdateComponent response message
  *

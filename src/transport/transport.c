@@ -1,7 +1,9 @@
-#include "libpldm/transport.h"
-#include "base.h"
-#include "libpldm/requester/pldm.h"
+/* SPDX-License-Identifier: Apache-2.0 OR GPL-2.0-or-later */
 #include "transport.h"
+
+#include <libpldm/transport.h>
+#include <libpldm/base.h>
+#include <libpldm/pldm.h>
 
 #include <errno.h>
 #include <limits.h>
@@ -203,37 +205,37 @@ pldm_transport_send_recv_msg(struct pldm_transport *transport, pldm_tid_t tid,
 		return PLDM_REQUESTER_POLL_FAIL;
 	}
 
-	do {
+	while (timercmp(&now, &end, <)) {
+		pldm_tid_t src_tid;
+
 		timersub(&end, &now, &remaining);
+
 		/* 0 <= `timeval_to_msec()` <= 4800, and 4800 < INT_MAX */
 		ret = pldm_transport_poll(transport,
 					  (int)(timeval_to_msec(&remaining)));
 		if (ret <= 0) {
-			break;
-		}
-
-		pldm_tid_t src_tid;
-		rc = pldm_transport_recv_msg(transport, &src_tid, pldm_resp_msg,
-					     resp_msg_len);
-		if (rc == PLDM_REQUESTER_SUCCESS) {
-			const struct pldm_msg_hdr *resp_hdr = *pldm_resp_msg;
-			if ((src_tid == tid) &&
-			    (req_hdr->instance_id == resp_hdr->instance_id) &&
-			    (req_hdr->type == resp_hdr->type) &&
-			    (req_hdr->command == resp_hdr->command) &&
-			    !resp_hdr->request) {
-				return rc;
-			}
-
-			/* This isn't the message we wanted */
-			free(*pldm_resp_msg);
+			return PLDM_REQUESTER_RECV_FAIL;
 		}
 
 		ret = clock_gettimeval(CLOCK_MONOTONIC, &now);
 		if (ret < 0) {
 			return PLDM_REQUESTER_POLL_FAIL;
 		}
-	} while (timercmp(&now, &end, <));
+
+		rc = pldm_transport_recv_msg(transport, &src_tid, pldm_resp_msg,
+					     resp_msg_len);
+		if (rc != PLDM_REQUESTER_SUCCESS) {
+			continue;
+		}
+
+		if (src_tid != tid || !pldm_msg_hdr_correlate_response(
+					      pldm_req_msg, *pldm_resp_msg)) {
+			free(*pldm_resp_msg);
+			continue;
+		}
+
+		return PLDM_REQUESTER_SUCCESS;
+	}
 
 	return PLDM_REQUESTER_RECV_FAIL;
 }

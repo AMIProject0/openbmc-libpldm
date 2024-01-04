@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: Apache-2.0 OR GPL-2.0-or-later */
 #ifndef TRANSPORT_PLDM_H
 #define TRANSPORT_PLDM_H
 
@@ -5,8 +6,9 @@
 extern "C" {
 #endif
 
-#include "libpldm/base.h"
-#include "libpldm/pldm.h"
+#include <libpldm/base.h>
+#include <libpldm/pldm.h>
+
 #include <stddef.h>
 
 struct pldm_transport;

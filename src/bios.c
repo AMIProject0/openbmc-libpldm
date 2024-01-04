@@ -1,6 +1,8 @@
-#include "bios.h"
-#include "base.h"
-#include "utils.h"
+/* SPDX-License-Identifier: Apache-2.0 OR GPL-2.0-or-later */
+#include <libpldm/base.h>
+#include <libpldm/bios.h>
+#include <libpldm/utils.h>
+
 #include <endian.h>
 #include <string.h>
 

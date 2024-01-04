@@ -1,6 +1,4 @@
-libpldm_include_dir += include_directories('.')
-
-libpldm_headers += files(
+libpldm_headers = files(
   'base.h',
   'bios.h',
   'bios_table.h',
@@ -11,26 +9,38 @@ libpldm_headers += files(
   'pdr.h',
   'platform.h',
   'pldm_types.h',
-  'requester/pldm.h',
+  'pldm.h',
   'state_set.h',
   'states.h',
   'transport.h',
+  'transport/af-mctp.h',
+  'transport/mctp-demux.h',
   'utils.h',
   )
 
-libpldm_transport_headers += files(
-  'transport/af-mctp.h',
-  'transport/mctp-demux.h'
-)
-
 if get_option('oem-ibm').allowed()
-  libpldm_include_dir += include_directories('oem/ibm')
   libpldm_headers += files(
-    'oem/ibm/libpldm/entity_oem_ibm.h',
-    'oem/ibm/libpldm/file_io.h',
-    'oem/ibm/libpldm/fru_oem_ibm.h',
-    'oem/ibm/libpldm/host.h',
-    'oem/ibm/libpldm/platform_oem_ibm.h',
-    'oem/ibm/libpldm/state_set_oem_ibm.h'
+    'oem/ibm/entity.h',
+    'oem/ibm/file_io.h',
+    'oem/ibm/fru.h',
+    'oem/ibm/host.h',
+    'oem/ibm/platform.h',
+    'oem/ibm/state_set.h'
+  )
+
+  install_symlink('file_io.h', pointing_to: 'oem/ibm/file_io.h', install_dir: 'include/libpldm')
+  install_symlink('entity_oem_ibm.h', pointing_to: 'oem/ibm/entity.h', install_dir: 'include/libpldm')
+  install_symlink('fru_oem_ibm.h', pointing_to: 'oem/ibm/fru.h', install_dir: 'include/libpldm')
+  install_symlink('host.h', pointing_to: 'oem/ibm/host.h', install_dir: 'include/libpldm')
+  install_symlink('platform_oem_ibm.h', pointing_to: 'oem/ibm/platform.h', install_dir: 'include/libpldm')
+  install_symlink('state_set_oem_ibm.h', pointing_to: 'oem/ibm/state_set.h', install_dir: 'include/libpldm')
+endif
+
+if get_option('oem-meta').allowed()
+  libpldm_headers += files(
+    'oem/meta/file_io.h',
   )
 endif
+
+
+install_headers(libpldm_headers, subdir: 'libpldm', preserve_path: true)

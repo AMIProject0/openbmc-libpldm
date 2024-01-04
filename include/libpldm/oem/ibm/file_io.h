@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: Apache-2.0 OR GPL-2.0-or-later */
 #ifndef FILEIO_H
 #define FILEIO_H
 
@@ -72,6 +73,7 @@ enum pldm_fileio_file_type {
 	PLDM_FILE_TYPE_PCIE_TOPOLOGY = 0x14,
 	PLDM_FILE_TYPE_CABLE_INFO = 0x15,
 	PLDM_FILE_TYPE_PSPD_VPD_PDD_KEYWORD = 0x16,
+	PLDM_FILE_TYPE_CHAP_DATA = 0x17,
 };
 
 #define PLDM_RW_FILE_MEM_REQ_BYTES			  20

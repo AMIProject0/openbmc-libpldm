@@ -1,8 +1,11 @@
+/* SPDX-License-Identifier: Apache-2.0 OR GPL-2.0-or-later */
 #include "array.h"
-#include "bios_table.h"
-#include "base.h"
-#include "bios.h"
-#include "utils.h"
+
+#include <libpldm/base.h>
+#include <libpldm/bios.h>
+#include <libpldm/bios_table.h>
+#include <libpldm/utils.h>
+
 #include <assert.h>
 #include <endian.h>
 #include <limits.h>
@@ -675,10 +678,10 @@ uint8_t pldm_bios_table_attr_value_entry_enum_decode_handles(
 {
 	uint8_t curr_num =
 		pldm_bios_table_attr_value_entry_enum_decode_number(entry);
-	number = number < curr_num ? number : curr_num;
-	memcpy(handles, &entry->value[1], number);
+	curr_num = number < curr_num ? number : curr_num;
+	memcpy(handles, &entry->value[1], curr_num);
 
-	return number;
+	return curr_num;
 }
 
 LIBPLDM_ABI_STABLE

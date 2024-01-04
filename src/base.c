@@ -1,5 +1,7 @@
-#include "base.h"
-#include "pldm_types.h"
+/* SPDX-License-Identifier: Apache-2.0 OR GPL-2.0-or-later */
+#include <libpldm/base.h>
+#include <libpldm/pldm_types.h>
+
 #include <endian.h>
 #include <stdint.h>
 #include <string.h>
@@ -63,6 +65,15 @@ uint8_t unpack_pldm_header(const struct pldm_msg_hdr *msg,
 	hdr->command = msg->command;
 
 	return PLDM_SUCCESS;
+}
+
+LIBPLDM_ABI_STABLE
+bool pldm_msg_hdr_correlate_response(const struct pldm_msg_hdr *req,
+				     const struct pldm_msg_hdr *resp)
+{
+	return req->instance_id == resp->instance_id && req->request &&
+	       !resp->request && req->type == resp->type &&
+	       req->command == resp->command;
 }
 
 LIBPLDM_ABI_STABLE

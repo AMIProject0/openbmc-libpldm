@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: Apache-2.0 OR GPL-2.0-or-later */
 #ifndef FW_UPDATE_H
 #define FW_UPDATE_H
 
@@ -5,8 +6,9 @@
 extern "C" {
 #endif
 
-#include "base.h"
-#include "pldm_types.h"
+#include <libpldm/base.h>
+#include <libpldm/pldm_types.h>
+
 #include "stdbool.h"
 #include <stddef.h>
 #include <stdint.h>

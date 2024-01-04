@@ -1,5 +1,7 @@
-#include "pdr.h"
-#include "platform.h"
+/* SPDX-License-Identifier: Apache-2.0 OR GPL-2.0-or-later */
+#include <libpldm/pdr.h>
+#include <libpldm/platform.h>
+
 #include <assert.h>
 #include <endian.h>
 #include <stdlib.h>
@@ -783,7 +785,7 @@ static int entity_association_pdr_add_children(
 
 	struct pldm_pdr_hdr *hdr = (struct pldm_pdr_hdr *)start;
 	hdr->version = 1;
-	hdr->record_handle = 0;
+	hdr->record_handle = record_handle;
 	hdr->type = PLDM_PDR_ENTITY_ASSOCIATION;
 	hdr->record_change_num = 0;
 	hdr->length = htole16(size - sizeof(struct pldm_pdr_hdr));
@@ -937,7 +939,7 @@ int pldm_entity_association_pdr_add_from_node_check(
 		0);
 }
 
-LIBPLDM_ABI_TESTING
+LIBPLDM_ABI_STABLE
 int pldm_entity_association_pdr_add_from_node_with_record_handle(
 	pldm_entity_node *node, pldm_pdr *repo, pldm_entity **entities,
 	size_t num_entities, bool is_remote, uint16_t terminus_handle,
@@ -1093,7 +1095,7 @@ void pldm_pdr_remove_remote_pdrs(pldm_pdr *repo)
 	}
 }
 
-LIBPLDM_ABI_TESTING
+LIBPLDM_ABI_STABLE
 pldm_pdr_record *pldm_pdr_find_last_in_range(const pldm_pdr *repo,
 					     uint32_t first, uint32_t last)
 {
@@ -1214,6 +1216,9 @@ void pldm_entity_association_tree_copy_root(
 	pldm_entity_association_tree *org_tree,
 	pldm_entity_association_tree *new_tree)
 {
+	assert(org_tree != NULL);
+	assert(new_tree != NULL);
+
 	new_tree->last_used_container_id = org_tree->last_used_container_id;
 	entity_association_tree_copy(org_tree->root, &(new_tree->root));
 }

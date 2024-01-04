@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: Apache-2.0 OR GPL-2.0-or-later */
 #ifndef BASE_H
 #define BASE_H
 
@@ -5,11 +6,12 @@
 extern "C" {
 #endif
 
+#include <libpldm/pldm_types.h>
+
 #include <asm/byteorder.h>
+#include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
-
-#include "pldm_types.h"
 
 typedef uint8_t pldm_tid_t;
 
@@ -17,10 +19,12 @@ typedef uint8_t pldm_tid_t;
  */
 enum pldm_supported_types {
 	PLDM_BASE = 0x00,
+	PLDM_SMBIOS = 0x01,
 	PLDM_PLATFORM = 0x02,
 	PLDM_BIOS = 0x03,
 	PLDM_FRU = 0x04,
 	PLDM_FWUP = 0x05,
+	PLDM_RDE = 0x06,
 	PLDM_OEM = 0x3F,
 };
 
@@ -131,8 +135,8 @@ struct pldm_msg_hdr {
 	uint8_t type : 6;	//!< PLDM type
 	uint8_t header_ver : 2; //!< Header version
 #elif defined(__BIG_ENDIAN_BITFIELD)
-	uint8_t header_ver : 2;	 //!< Header version
-	uint8_t type : 6;	 //!< PLDM type
+	uint8_t header_ver : 2; //!< Header version
+	uint8_t type : 6;	//!< PLDM type
 #endif
 	uint8_t command; //!< PLDM command code
 } __attribute__((packed));
@@ -151,6 +155,22 @@ struct pldm_msg {
 	struct pldm_msg_hdr hdr; //!< PLDM message header
 	uint8_t payload[1]; //!< &payload[0] is the beginning of the payload
 } __attribute__((packed));
+
+/**
+ * @brief Compare the headers from two PLDM messages to determine if the latter
+ * is a message representing a response to the former, where the former must be
+ * a request.
+ *
+ * @param[in] req - A pointer to a PLDM header object, which must represent a
+ *                  request
+ * @param[in] resp - A pointer to a PLDM header object, which may represent a
+ *		     response to the provided request.
+ *
+ * @return true if the header pointed to by resp represents a message that is a
+ *	   response to the header pointed to by req, otherwise false.
+ */
+bool pldm_msg_hdr_correlate_response(const struct pldm_msg_hdr *req,
+				     const struct pldm_msg_hdr *resp);
 
 /** @struct pldm_header_info
  *

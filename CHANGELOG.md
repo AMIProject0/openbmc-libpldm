@@ -17,6 +17,32 @@ Change categories:
 
 ## [Unreleased]
 
+### Added
+
+1. base: Provide pldm_msg_hdr_correlate_response()
+2. transport: af-mctp: Add pldm_transport_af_mctp_bind()
+3. oem: ibm: Add chapdata file type support
+4. base: Added PLDM_SMBIOS & PLDM_RDE message types
+5. oem: meta: Add decode_oem_meta_file_io_req()
+
+### Changed
+
+1. base: Stabilise pldm_msg_hdr_correlate_response()
+2. transport: af-mctp: Stabilise pldm_transport_af_mctp_bind()
+3. libpldm: Fix header use
+4. libpldm: More fixes for header use
+5. pdr: Stabilise pldm_pdr_find_last_in_range() API
+6. pdr: Stabilise pldm_entity_association_pdr_add_from_node_with_record_handle()
+7. oem: meta: stabilise decode_oem_meta_file_io_req()
+8. pdr: pldm_entity_association_tree_copy_root(): Document preconditions
+
+### Fixed
+
+1. libpldm: Rationalise the local and installed path of pldm.h
+2. pdr: Assign record_handle in entity_association_pdr_add_children()
+3. msgbuf: Require sensor data enum in pldm_msgbuf_extract_sensor_value()
+4. pdr: Remove redundant constant for minimum numeric sensor PDR length
+
 ## [0.7.0] - 2023-08-29
 
 ### Added

@@ -24,10 +24,18 @@ tests = [
   'libpldm_pdr_test',
   'libpldm_firmware_update_test',
   'msgbuf',
+  'responder',
 ]
 
 if get_option('abi').contains('testing')
-  tests += [ 'transport' ]
+  tests += [
+    'transport',
+    'transport/send_recv_one',
+    'transport/send_recv_timeout',
+    'transport/send_recv_unwanted',
+    'transport/send_recv_wrong_pldm_type',
+    'transport/send_recv_wrong_command_code'
+  ]
 endif
 
 if get_option('oem-ibm').allowed()
@@ -37,12 +45,18 @@ if get_option('oem-ibm').allowed()
   ]
 endif
 
-src_includes = include_directories('..' / 'src', '..' / 'include' / 'libpldm')
+if get_option('oem-meta').allowed()
+  tests += [
+    'oem/meta/libpldm_fileio_test',
+  ]
+endif
+
+test_include_dirs = [ libpldm_include_dir, include_directories('../src') ]
 
 foreach t : tests
   test(t, executable(t.underscorify(), t + '.cpp',
                      implicit_include_directories: false,
-                     include_directories: src_includes,
+                     include_directories: test_include_dirs,
                      dependencies: [
                          libpldm_dep,
                          gtest_dep,
@@ -53,9 +67,9 @@ endforeach
 test('bios_table_iter', executable('bios_table_iter',
                                    'bios_table_iter.c',
                                    implicit_include_directories: false,
-                                   include_directories: src_includes))
+                                   include_directories: test_include_dirs))
 
 test('msgbuf_generic', executable('msgbuf_generic',
                                   'msgbuf_generic.c',
                                   implicit_include_directories: false,
-                                  include_directories: src_includes))
+                                  include_directories: test_include_dirs))

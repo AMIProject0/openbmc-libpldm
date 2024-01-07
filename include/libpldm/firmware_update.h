@@ -995,6 +995,18 @@ int decode_update_component_resp(const struct pldm_msg *msg,
 				 bitfield32_t *update_option_flags_enabled,
 				 uint16_t *time_before_req_fw_data);
 
+/** @brief Encode RequestFirmwareData request message
+ * 
+ * 	@param[in] instance_id - Message's instance id
+ * 	@param[in,out] msg - Request message
+ * 	@param[in] req_data - Pointer to RequestFirmwareData request data
+ * 
+ * 	@return pldm_completion_codes
+*/
+int encode_request_firmware_data_req(uint8_t instance_id,
+				struct pldm_msg *msg,
+				struct pldm_request_firmware_data_req *req_data);
+
 /** @brief Decode RequestFirmwareData request message
  *
  *	@param[in] msg - Request message
@@ -1032,6 +1044,30 @@ int encode_request_firmware_data_resp(uint8_t instance_id,
 				      struct pldm_msg *msg,
 				      size_t payload_length);
 
+/** @brief Decode RequestFirmwareData response message
+ * 
+ * 	@param[in] msg - Response message
+ * 	@param[out] completion_code - Pointer to response completion code
+ * 	@param[out] comp_image_portion - Pointer to ComponentImagePortion
+ * 
+ * 	@return pldm_completion_code
+*/
+int decode_request_firmware_data_resp(struct pldm_msg *msg,
+					uint8_t *completion_code,
+					struct variable_field *comp_image_portion);
+
+/** @brief Encode TransferComplete request message
+ * 
+ * 	@param[in] instance_id - Message's instance id
+ * 	@param[in,out] msg - Request message
+ * 	@param[in] transfer_result - TransferResult
+ * 
+ * 	@return pldm_completion_codes
+*/
+int encode_transfer_complete_req(uint8_t instance_id,
+					struct pldm_msg *msg,
+					uint8_t transfer_result);
+
 /** @brief Decode TransferComplete request message
  *
  *  @param[in] msg - Request message
@@ -1058,6 +1094,16 @@ int decode_transfer_complete_req(const struct pldm_msg *msg,
  */
 int encode_transfer_complete_resp(uint8_t instance_id, uint8_t completion_code,
 				  struct pldm_msg *msg, size_t payload_length);
+
+/** @brief Decode TransferComplete response message
+ * 
+ * 	@param[in] msg - Response message
+ * 	@param[out] completion_code - Pointer to response completion code
+ * 
+ * 	@return pldm_completion_codes
+*/
+int decode_transfer_complete_resp(struct pldm_msg *msg,
+					uint8_t *completion_code);
 
 /** @brief Decode VerifyComplete request message
  *

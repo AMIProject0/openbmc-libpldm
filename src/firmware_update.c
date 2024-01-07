@@ -1364,6 +1364,30 @@ int decode_update_component_resp(const struct pldm_msg *msg,
 }
 
 LIBPLDM_ABI_STABLE
+int encode_request_firmware_data_req(uint8_t instance_id,
+				struct pldm_msg *msg,
+				struct pldm_request_firmware_data_req *req_data)
+{
+	struct pldm_header_info header = { 0 };
+	header.instance = instance_id;
+	header.msg_type = PLDM_REQUEST;
+	header.pldm_type = PLDM_FWUP;
+	header.command = PLDM_REQUEST_FIRMWARE_DATA;
+	uint8_t rc = pack_pldm_header(&header, &(msg->hdr));
+	if (rc) {
+		return rc;
+	}
+
+	struct pldm_request_firmware_data_req *request = 
+		(struct pldm_request_firmware_data_req *)msg->payload;
+
+	request->offset = htole32(req_data->offset);
+	request->length = htole32(req_data->length);
+
+	return PLDM_SUCCESS;
+}
+
+LIBPLDM_ABI_STABLE
 int decode_request_firmware_data_req(const struct pldm_msg *msg,
 				     size_t payload_length, uint32_t *offset,
 				     uint32_t *length)
@@ -1412,6 +1436,37 @@ int encode_request_firmware_data_resp(uint8_t instance_id,
 }
 
 LIBPLDM_ABI_STABLE
+int decode_request_firmware_data_resp(struct pldm_msg *msg,
+					uint8_t *completion_code,
+					struct variable_field *comp_image_portion)
+{
+	*completion_code = msg->payload[0];
+	comp_image_portion->ptr = msg->payload + 1;
+
+	return PLDM_SUCCESS;
+}
+
+LIBPLDM_ABI_STABLE
+int encode_transfer_complete_req(uint8_t instance_id,
+					struct pldm_msg *msg,
+					uint8_t transfer_result)
+{
+	struct pldm_header_info header = { 0 };
+	header.instance = instance_id;
+	header.msg_type = PLDM_REQUEST;
+	header.pldm_type = PLDM_FWUP;
+	header.command = PLDM_TRANSFER_COMPLETE;
+	uint8_t rc = pack_pldm_header(&header, &(msg->hdr));
+	if (rc) {
+		return rc;
+	}
+
+	msg->payload[0] = transfer_result;
+
+	return PLDM_SUCCESS;
+}
+
+LIBPLDM_ABI_STABLE
 int decode_transfer_complete_req(const struct pldm_msg *msg,
 				 size_t payload_length,
 				 uint8_t *transfer_result)
@@ -1427,6 +1482,8 @@ int decode_transfer_complete_req(const struct pldm_msg *msg,
 	*transfer_result = msg->payload[0];
 	return PLDM_SUCCESS;
 }
+
+
 
 LIBPLDM_ABI_STABLE
 int encode_transfer_complete_resp(uint8_t instance_id, uint8_t completion_code,
@@ -1451,6 +1508,15 @@ int encode_transfer_complete_resp(uint8_t instance_id, uint8_t completion_code,
 	}
 
 	msg->payload[0] = completion_code;
+
+	return PLDM_SUCCESS;
+}
+
+LIBPLDM_ABI_STABLE
+int decode_transfer_complete_resp(struct pldm_msg *msg,
+					uint8_t *completion_code)
+{
+	*completion_code = msg->payload[0];
 
 	return PLDM_SUCCESS;
 }

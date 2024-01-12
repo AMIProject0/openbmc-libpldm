@@ -1522,6 +1522,25 @@ int decode_transfer_complete_resp(struct pldm_msg *msg,
 }
 
 LIBPLDM_ABI_STABLE
+int encode_verify_complete_req(uint8_t instance_id,
+					struct pldm_msg *msg,
+					uint8_t verify_result)
+{
+	struct pldm_header_info header = { 0 };
+	header.instance = instance_id;
+	header.msg_type = PLDM_REQUEST;
+	header.pldm_type = PLDM_FWUP;
+	header.command = PLDM_VERIFY_COMPLETE;
+	uint8_t rc = pack_pldm_header(&header, &(msg->hdr));
+	if (rc) {
+		return rc;
+	}
+
+	msg->payload[0] = verify_result;
+	return PLDM_SUCCESS;
+}
+
+LIBPLDM_ABI_STABLE
 int decode_verify_complete_req(const struct pldm_msg *msg,
 			       size_t payload_length, uint8_t *verify_result)
 {
@@ -1560,6 +1579,38 @@ int encode_verify_complete_resp(uint8_t instance_id, uint8_t completion_code,
 	}
 
 	msg->payload[0] = completion_code;
+
+	return PLDM_SUCCESS;
+}
+
+LIBPLDM_ABI_STABLE
+int decode_verify_complete_resp(struct pldm_msg *msg,
+				uint8_t *completion_code)
+{
+	*completion_code = msg->payload[0];
+	return PLDM_SUCCESS;
+}
+
+LIBPLDM_ABI_STABLE
+int encode_apply_complete_req(uint8_t instance_id,
+				struct pldm_msg *msg,
+				struct pldm_apply_complete_req *req_data)
+{
+	struct pldm_header_info header = { 0 };
+	header.instance = instance_id;
+	header.msg_type = PLDM_REQUEST;
+	header.pldm_type = PLDM_FWUP;
+	header.command = PLDM_APPLY_COMPLETE;
+	uint8_t rc = pack_pldm_header(&header, &(msg->hdr));
+	if (rc) {
+		return rc;
+	}
+
+	struct pldm_apply_complete_req *request = 
+		(struct pldm_apply_complete_req *)msg->payload;
+
+	request->apply_result = req_data->apply_result;
+	request->comp_activation_methods_modification.value = htole16(req_data->comp_activation_methods_modification.value);
 
 	return PLDM_SUCCESS;
 }
@@ -1621,6 +1672,14 @@ int encode_apply_complete_resp(uint8_t instance_id, uint8_t completion_code,
 }
 
 LIBPLDM_ABI_STABLE
+int decode_apply_complete_resp(struct pldm_msg *msg,
+				uint8_t *completion_code)
+{
+	*completion_code = msg->payload[0];
+	return PLDM_SUCCESS;
+}
+
+LIBPLDM_ABI_STABLE
 int encode_activate_firmware_req(uint8_t instance_id,
 				 bool8_t self_contained_activation_req,
 				 struct pldm_msg *msg, size_t payload_length)
@@ -1652,6 +1711,42 @@ int encode_activate_firmware_req(uint8_t instance_id,
 		(struct pldm_activate_firmware_req *)msg->payload;
 
 	request->self_contained_activation_req = self_contained_activation_req;
+
+	return PLDM_SUCCESS;
+}
+
+LIBPLDM_ABI_STABLE
+int decode_activate_firmware_req(struct pldm_msg *msg,
+					struct pldm_activate_firmware_req *req_data)
+{
+	struct pldm_activate_firmware_req *request =
+		(struct pldm_activate_firmware_req *)msg->payload;
+
+	req_data->self_contained_activation_req = request->self_contained_activation_req;
+
+	return PLDM_SUCCESS;
+}
+
+LIBPLDM_ABI_STABLE
+int encode_activate_firmware_resp(uint8_t instance_id,
+				struct pldm_msg *msg,
+				struct pldm_activate_firmware_resp *resp_data)
+{
+	struct pldm_header_info header = { 0 };
+	header.instance = instance_id;
+	header.msg_type = PLDM_RESPONSE;
+	header.pldm_type = PLDM_FWUP;
+	header.command = PLDM_ACTIVATE_FIRMWARE;
+	uint8_t rc = pack_pldm_header(&header, &(msg->hdr));
+	if (rc) {
+		return rc;
+	}
+
+	struct pldm_activate_firmware_resp *response =
+		(struct pldm_activate_firmware_resp *)msg->payload;
+
+	response->completion_code = resp_data->completion_code;
+	response->estimated_time_activation = htole16(resp_data->estimated_time_activation);
 
 	return PLDM_SUCCESS;
 }

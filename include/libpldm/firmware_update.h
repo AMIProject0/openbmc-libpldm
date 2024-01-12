@@ -241,7 +241,7 @@ enum pldm_firmware_update_transfer_result_values {
 	PLDM_FWUP_VENDOR_TRANSFER_RESULT_RANGE_MAX = 0x8F
 };
 
-/**@brief VerifyResult values in the request of VerifyComplete
+/** @brief VerifyResult values in the request of VerifyComplete
  */
 enum pldm_firmware_update_verify_result_values {
 	PLDM_FWUP_VERIFY_SUCCESS = 0x00,
@@ -1105,6 +1105,18 @@ int encode_transfer_complete_resp(uint8_t instance_id, uint8_t completion_code,
 int decode_transfer_complete_resp(struct pldm_msg *msg,
 					uint8_t *completion_code);
 
+/** @brief Encode VerifyComplete request message
+ * 
+ * 	@param[in] instance_id - Message's instance id
+ * 	@param[in,out] msg - Request message
+ * 	@param[in] verify_result - VerifyResult
+ * 
+ * 	@return pldm_completion_codes
+*/
+int encode_verify_complete_req(uint8_t instance_id,
+					struct pldm_msg *msg,
+					uint8_t verify_result);
+
 /** @brief Decode VerifyComplete request message
  *
  *  @param[in] msg - Request message
@@ -1130,6 +1142,28 @@ int decode_verify_complete_req(const struct pldm_msg *msg,
  */
 int encode_verify_complete_resp(uint8_t instance_id, uint8_t completion_code,
 				struct pldm_msg *msg, size_t payload_length);
+
+/** @brief Decode VerifyComplete response message
+ * 
+ * 	@param[in] msg - Response message
+ * 	@param[out] completion_code - Pointer to response completion code
+ * 
+ * 	@return pldm_completion_codes
+*/
+int decode_verify_complete_resp(struct pldm_msg *msg,
+				uint8_t *completion_code);
+
+/** @brief Encode ApplyComplete request message
+ * 
+ * 	@param[in] instance_id - Message's instance id
+ * 	@param[in,out] msg - Request message
+ * 	@param[in] req_data - Pointer to ApplyComplete request data
+ * 
+ * 	@return pldm_completion_codes
+*/
+int encode_apply_complete_req(uint8_t instance_id,
+				struct pldm_msg *msg,
+				struct pldm_apply_complete_req *req_data);
 
 /** @brief Decode ApplyComplete request message
  *
@@ -1161,6 +1195,16 @@ int decode_apply_complete_req(
 int encode_apply_complete_resp(uint8_t instance_id, uint8_t completion_code,
 			       struct pldm_msg *msg, size_t payload_length);
 
+/** @brief Decode ApplyComplete response message
+ * 
+ * 	@param[in] msg - Response message
+ * 	@param[out] completion_code - Pointer to response CompleteCode
+ * 
+ * 	@return pldm_completion_codes
+*/
+int decode_apply_complete_resp(struct pldm_msg *msg,
+					uint8_t *completion_code);
+
 /** @brief Create PLDM request message for ActivateFirmware
  *
  *  @param[in] instance_id - Message's instance id
@@ -1176,6 +1220,28 @@ int encode_apply_complete_resp(uint8_t instance_id, uint8_t completion_code,
 int encode_activate_firmware_req(uint8_t instance_id,
 				 bool8_t self_contained_activation_req,
 				 struct pldm_msg *msg, size_t payload_length);
+
+/** @brief Decode ActivateFirmware request message
+ * 
+ * 	@param[in] msg - Request message
+ * 	@param[out] req_data - Pointer to ActivateFirmware request data
+ * 
+ * 	@return pldm_completion_codes
+*/
+int decode_activate_firmware_req(struct pldm_msg *msg,
+				struct pldm_activate_firmware_req *req_data);
+
+/** @brief Encode ActivateFirmware response message
+ * 
+ * 	@param[in] instance_id - Message's instance id
+ * 	@param[in,out] msg - Response message
+ * 	@param[in] resp_data - Pointer to ActivateFirmware response data
+ * 
+ * 	@return pldm_completion_codes
+*/
+int encode_activate_firmware_resp(uint8_t instance_id,
+				struct pldm_msg *msg,
+				struct pldm_activate_firmware_resp *resp_data);
 
 /** @brief Decode ActivateFirmware response message
  *

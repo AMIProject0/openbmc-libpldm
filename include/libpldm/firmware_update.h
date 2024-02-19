@@ -43,7 +43,9 @@ enum pldm_firmware_update_commands {
 	PLDM_ACTIVATE_FIRMWARE = 0x1A,
 	PLDM_GET_STATUS = 0x1B,
 	PLDM_CANCEL_UPDATE_COMPONENT = 0x1C,
-	PLDM_CANCEL_UPDATE = 0x1D
+	PLDM_CANCEL_UPDATE = 0x1D,
+	PLDM_GET_PACKAGE_DATA = 0x1E,
+	PLDM_GET_DEVICE_METADATA = 0x1F
 };
 
 /** @brief PLDM Firmware update completion codes
@@ -445,12 +447,31 @@ struct pldm_request_update_req {
 
 /** @struct pldm_request_update_resp
  *
- *  Structure representing Request Update response
+ *  Structure representing RequestUpdate response
  */
 struct pldm_request_update_resp {
 	uint8_t completion_code;
 	uint16_t fd_meta_data_len;
 	uint8_t fd_will_send_pkg_data;
+} __attribute__((packed));
+
+/** @struct get_fd_data_req
+ *
+ *  Structure representing GetMetaData/GetPackageData request
+ */
+struct pldm_multipart_transfer_req {
+	uint32_t data_transfer_handle;
+	uint8_t transfer_operation_flag;
+} __attribute__((packed));
+
+/** @struct get_fd_data_resp
+ *
+ *  Structure representing GetMetaData/GetPackageData response
+ */
+struct pldm_multipart_transfer_resp {
+	uint8_t completion_code;
+	uint32_t next_data_transfer_handle;
+	uint8_t transfer_flag;
 } __attribute__((packed));
 
 /** @struct pldm_pass_component_table_req
@@ -847,6 +868,58 @@ int decode_request_update_resp(const struct pldm_msg *msg,
 			       uint16_t *fd_meta_data_len,
 			       uint8_t *fd_will_send_pkg_data);
 
+/** @brief Encode a GetPackageData request 
+ * 	
+ * 	@param[in] instance_id - Message's instance_id
+ * 	@param[in,out] msg - Message will be written to this
+ * 	@param[in] req_data - GetPackageData request data
+ * 
+ * 	@return pldm_completion_codes 
+*/
+int encode_get_package_data_req(uint8_t instance_id,
+						struct pldm_msg *msg,
+						struct pldm_multipart_transfer_req *req_data);
+
+/** @brief Decode a GetPackageData response
+ * 
+ * 	@param[in] msg - Response message
+ * 	@param[out] resp_data - GetPackageData response data
+ * 	@param[out] portion_of_package_data - Portion of response package data
+ * 	@param[in] payload_length - Length of the response message payload
+ * 
+ * 	@return pldm_completion_codes
+*/
+int decode_get_package_data_resp(struct pldm_msg *msg,
+						struct pldm_multipart_transfer_resp *resp_data,
+						struct variable_field *portion_of_package_data,
+						size_t payload_length);
+
+/** @brief Decode a GetDeviceMetaData request
+ * 
+ * 	@param[in] msg - Request message
+ * 	@param[in] payload_length - Length of request message payload
+ * 	@param[out] req_data - Request message data
+ * 
+ * 	@return pldm_completion_codes
+*/
+int decode_get_device_meta_data_req(struct pldm_msg *msg,
+						size_t payload_length,
+						struct pldm_multipart_transfer_req *req_data);
+
+/** @brief Encode a GetDeviceMetaData response
+ * 
+ * 	@param[in] instance_id - Message's instance id
+ * 	@param[in,out] msg - Response message
+ * 	@param[in] payload_length - Length of response message payload
+ * 	@param[in] resp_data - Response message data
+ * 	@param[in] portion_of_device_meta_data - Portion of DeviceMetaData
+ * 
+ * 	@return pldm_completion_codes
+*/
+int encode_get_device_meta_data_resp(uint8_t instance_id, struct pldm_msg *msg,
+						size_t payload_length,
+						struct pldm_multipart_transfer_resp *resp_data,
+						struct variable_field *portion_of_device_meta_data);
 
 /** @brief Create PLDM request message for PassComponentTable
  *

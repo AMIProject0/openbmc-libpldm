@@ -1542,12 +1542,13 @@ int encode_request_firmware_data_resp(uint8_t instance_id,
 }
 
 LIBPLDM_ABI_STABLE
-int decode_request_firmware_data_resp(struct pldm_msg *msg,
+int decode_request_firmware_data_resp(struct pldm_msg *msg, size_t payload_length,
 					uint8_t *completion_code,
 					struct variable_field *comp_image_portion)
 {
 	*completion_code = msg->payload[0];
 	comp_image_portion->ptr = msg->payload + 1;
+	comp_image_portion->length = payload_length - 1;
 
 	return PLDM_SUCCESS;
 }

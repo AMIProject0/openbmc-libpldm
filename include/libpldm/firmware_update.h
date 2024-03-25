@@ -1118,12 +1118,13 @@ int encode_request_firmware_data_resp(uint8_t instance_id,
 /** @brief Decode RequestFirmwareData response message
  * 
  * 	@param[in] msg - Response message
+ * 	@param[in] payload_length - Message's payload length
  * 	@param[out] completion_code - Pointer to response completion code
  * 	@param[out] comp_image_portion - Pointer to ComponentImagePortion
  * 
  * 	@return pldm_completion_code
 */
-int decode_request_firmware_data_resp(struct pldm_msg *msg,
+int decode_request_firmware_data_resp(struct pldm_msg *msg, size_t payload_length,
 					uint8_t *completion_code,
 					struct variable_field *comp_image_portion);
 

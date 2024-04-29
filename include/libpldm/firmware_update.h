@@ -1178,26 +1178,51 @@ int encode_update_component_req(
 /** @brief Decode UpdateComponent request message
  * 
  * 	@param[in] msg - Request message
- * 	@param[out] req_data - Pointer to UpdateComponent request data
- * 	@param[out] comp_ver_str - Pointer to ComponentVersionString
+ * 	@param[in] payload_length -  Length of request message payload information
+ *  @param[out] comp_classification - ComponentClassification
+ *  @param[out] comp_identifier - ComponentIdentifier
+ *  @param[out] comp_classification_index - ComponentClassificationIndex
+ *  @param[out] comp_comparison_stamp - ComponentComparisonStamp
+ *  @param[out] comp_image_size - ComponentImageSize
+ *  @param[out] update_option_flags - UpdateOptionFlags
+ *  @param[out] comp_ver_str_type - ComponentVersionStringType
+ *  @param[out] comp_ver_str_len - ComponentVersionStringLength
+ *  @param[out] comp_ver_str - ComponentVersionString
  * 
  * 	@return pldm_completion_codes
 */
 int decode_update_component_req(struct pldm_msg *msg,
-				struct pldm_update_component_req *req_data,
-				struct variable_field *comp_ver_str);
+				size_t payload_length,
+                uint16_t *comp_classification,
+	            uint16_t *comp_identifier, uint8_t *comp_classification_index,
+	            uint32_t *comp_comparison_stamp, uint32_t *comp_image_size,
+	            bitfield32_t *update_option_flags, uint8_t *comp_ver_str_type,
+	            uint8_t *comp_ver_str_len, struct variable_field *comp_ver_str);
 
 /** @brief Encode UpdateComponent response message
  * 
  * 	@param[in] instance_id - Message's instance id
  * 	@param[in,out] msg - Response message
- * 	@param[in] resp_data - Pointer to UpdateComponent response data
+ *	@param[in] payload_length -  Length of response message payload information
+ *  @param[in] completion_code - Completion code
+ *  @param[in] comp_compatibility_resp - Component compatibility response
+ *  @param[in] comp_compatibility_resp_code - Component compatibility response code
+ *  @param[in] update_option_flags_enabled - UpdateOptionsFlagEnabled
+ *  @param[in] time_before_req_fw_data - Estimated time  before sending RequestFirmwareData
  * 	
  * 	@return pldm_completion_codes
+ * 
+ * @note  Caller is responsible for memory alloc and dealloc of param
+ *         'msg.payload'
 */
 int encode_update_component_resp(uint8_t instance_id,
 				struct pldm_msg *msg,
-				struct pldm_update_component_resp *resp_data);
+                size_t payload_length,
+				uint8_t completion_code,
+				uint8_t comp_compatibility_resp,
+				uint8_t comp_compatibility_resp_code,
+				bitfield32_t update_option_flags_enabled,
+				uint16_t time_before_req_fw_data);
 
 /** @brief Decode UpdateComponent response message
  *
@@ -1227,13 +1252,20 @@ int decode_update_component_resp(const struct pldm_msg *msg,
  * 
  * 	@param[in] instance_id - Message's instance id
  * 	@param[in,out] msg - Request message
- * 	@param[in] req_data - Pointer to RequestFirmwareData request data
+ * 	@param[in] payload_length - Length of request message payload
+ *  @param[in] offset - Offset of the component image segment within 
+ *                      the current component being transferred
+ *  @param[in] length - Size of the component image segment requested by the FD
  * 
  * 	@return pldm_completion_codes
+ * 
+ * @note  Caller is responsible for memory alloc and dealloc of param
+ *         'msg.payload'
 */
 int encode_request_firmware_data_req(uint8_t instance_id,
 				struct pldm_msg *msg,
-				struct pldm_request_firmware_data_req *req_data);
+                size_t payload_length,
+				uint32_t offset, uint32_t length);
 
 /** @brief Decode RequestFirmwareData request message
  *
@@ -1277,24 +1309,28 @@ int encode_request_firmware_data_resp(uint8_t instance_id,
  * 	@param[in] msg - Response message
  * 	@param[in] payload_length - Message's payload length
  * 	@param[out] completion_code - Pointer to response completion code
- * 	@param[out] comp_image_portion - Pointer to ComponentImagePortion
  * 
  * 	@return pldm_completion_code
 */
-int decode_request_firmware_data_resp(struct pldm_msg *msg, size_t payload_length,
-					uint8_t *completion_code,
-					struct variable_field *comp_image_portion);
+int decode_request_firmware_data_resp(const struct pldm_msg *msg, 
+                    size_t payload_length,
+					uint8_t *completion_code);
 
 /** @brief Encode TransferComplete request message
  * 
  * 	@param[in] instance_id - Message's instance id
  * 	@param[in,out] msg - Request message
+ *  @param[in] payload_length -  Length of request message payload
  * 	@param[in] transfer_result - TransferResult
  * 
  * 	@return pldm_completion_codes
+ * 
+ * @note  Caller is responsible for memory alloc and dealloc of param
+ *		   'msg.payload'
 */
 int encode_transfer_complete_req(uint8_t instance_id,
 					struct pldm_msg *msg,
+                    size_t payload_length,
 					uint8_t transfer_result);
 
 /** @brief Decode TransferComplete request message
@@ -1312,8 +1348,8 @@ int decode_transfer_complete_req(const struct pldm_msg *msg,
 /** @brief Create PLDM response message for TransferComplete
  *
  *  @param[in] instance_id - Message's instance id
- *  @param[in] completion_code - CompletionCode
  *  @param[in,out] msg - Message will be written to this
+ *  @param[in] completion_code - CompletionCode
  *  @param[in] payload_length - Length of response message payload
  *
  *  @return pldm_completion_codes
@@ -1327,30 +1363,37 @@ int encode_transfer_complete_resp(uint8_t instance_id, uint8_t completion_code,
 /** @brief Decode TransferComplete response message
  * 
  * 	@param[in] msg - Response message
+ *  @param[in] payload_length - Length of response message payload
  * 	@param[out] completion_code - Pointer to response completion code
  * 
  * 	@return pldm_completion_codes
 */
-int decode_transfer_complete_resp(struct pldm_msg *msg,
+int decode_transfer_complete_resp(const struct pldm_msg *msg,
+                    size_t payload_length,
 					uint8_t *completion_code);
 
 /** @brief Encode VerifyComplete request message
  * 
  * 	@param[in] instance_id - Message's instance id
  * 	@param[in,out] msg - Request message
+ *  @param[in] payload_length - Length of response message payload
  * 	@param[in] verify_result - VerifyResult
  * 
  * 	@return pldm_completion_codes
+ * 
+ *  @note  Caller is responsible for memory alloc and dealloc of param
+ *         'msg.payload'
 */
 int encode_verify_complete_req(uint8_t instance_id,
 					struct pldm_msg *msg,
+                    size_t payload_length,
 					uint8_t verify_result);
 
 /** @brief Decode VerifyComplete request message
  *
  *  @param[in] msg - Request message
  *  @param[in] payload_length - Length of request message payload
- *  @param[in] verify_result - Pointer to hold VerifyResult
+ *  @param[out] verify_result - Pointer to hold VerifyResult
  *
  *  @return pldm_completion_codes
  */
@@ -1376,30 +1419,39 @@ int encode_verify_complete_resp(uint8_t instance_id, uint8_t completion_code,
  * 
  * 	@param[in] msg - Response message
  * 	@param[out] completion_code - Pointer to response completion code
+ *  @param[in] payload_length - Length of response message payload
  * 
  * 	@return pldm_completion_codes
 */
-int decode_verify_complete_resp(struct pldm_msg *msg,
+int decode_verify_complete_resp(const struct pldm_msg *msg,
+                size_t payload_length,
 				uint8_t *completion_code);
 
 /** @brief Encode ApplyComplete request message
  * 
  * 	@param[in] instance_id - Message's instance id
  * 	@param[in,out] msg - Request message
- * 	@param[in] req_data - Pointer to ApplyComplete request data
+ *  @param[in] payload_length - Length of request message payload
+ *  @param[in] apply_result - ApplyResult
+ *  @param[in] comp_activation_methods_modification - ComponentActivationMethodsModification
  * 
  * 	@return pldm_completion_codes
+ * 
+ *  @note  Caller is responsible for memory alloc and dealloc of param
+ *         'msg.payload'
 */
 int encode_apply_complete_req(uint8_t instance_id,
 				struct pldm_msg *msg,
-				struct pldm_apply_complete_req *req_data);
+				size_t payload_length,
+                uint8_t apply_result,
+                bitfield16_t comp_activation_methods_modification);
 
 /** @brief Decode ApplyComplete request message
  *
  *  @param[in] msg - Request message
  *  @param[in] payload_length - Length of request message payload
- *  @param[in] apply_result - Pointer to hold ApplyResult
- *  @param[in] comp_activation_methods_modification - Pointer to hold the
+ *  @param[out] apply_result - Pointer to hold ApplyResult
+ *  @param[out] comp_activation_methods_modification - Pointer to hold the
  *                                        ComponentActivationMethodsModification
  *
  *  @return pldm_completion_codes
@@ -1427,11 +1479,13 @@ int encode_apply_complete_resp(uint8_t instance_id, uint8_t completion_code,
 /** @brief Decode ApplyComplete response message
  * 
  * 	@param[in] msg - Response message
+ *  @param[in] payload_length - Length of response message payload
  * 	@param[out] completion_code - Pointer to response CompleteCode
  * 
  * 	@return pldm_completion_codes
 */
-int decode_apply_complete_resp(struct pldm_msg *msg,
+int decode_apply_complete_resp(const struct pldm_msg *msg,
+                    size_t payload_length,
 					uint8_t *completion_code);
 
 /** @brief Create PLDM request message for ActivateFirmware
@@ -1453,24 +1507,33 @@ int encode_activate_firmware_req(uint8_t instance_id,
 /** @brief Decode ActivateFirmware request message
  * 
  * 	@param[in] msg - Request message
- * 	@param[out] req_data - Pointer to ActivateFirmware request data
+ *  @param[in] payload_length - Length of request message payload
+ *  @param[in] self_contained_activation_req - Pointer to hold SelfContainedActivationRequest
  * 
  * 	@return pldm_completion_codes
 */
-int decode_activate_firmware_req(struct pldm_msg *msg,
-				struct pldm_activate_firmware_req *req_data);
+int decode_activate_firmware_req(const struct pldm_msg *msg,
+				size_t payload_length,
+                bool8_t *self_contained_activation_req);
 
 /** @brief Encode ActivateFirmware response message
  * 
  * 	@param[in] instance_id - Message's instance id
  * 	@param[in,out] msg - Response message
- * 	@param[in] resp_data - Pointer to ActivateFirmware response data
+ *  @param[in] payload_length - Length of response message payload
+ *  @param[in] completion_code - CompletionCode
+ *  @param[in] estimated_time_activation - EstimatedTimeForSelfContainedActivation
  * 
  * 	@return pldm_completion_codes
+ * 
+ *  @note  Caller is responsible for memory alloc and dealloc of param
+ *         'msg.payload'
 */
 int encode_activate_firmware_resp(uint8_t instance_id,
 				struct pldm_msg *msg,
-				struct pldm_activate_firmware_resp *resp_data);
+                size_t payload_length,
+				uint8_t completion_code,
+				uint16_t estimated_time_activation);
 
 /** @brief Decode ActivateFirmware response message
  *

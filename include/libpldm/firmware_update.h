@@ -236,6 +236,7 @@ enum pldm_firmware_update_transfer_result_values {
 	PLDM_FWUP_TRANSFER_ERROR_IMAGE_CORRUPT = 0x02,
 	PLDM_FWUP_TRANSFER_ERROR_VERSION_MISMATCH = 0x02,
 	PLDM_FWUP_FD_ABORTED_TRANSFER = 0x03,
+    PLDM_FWUP_FD_GENERIC_TRANSFER_ERROR = 0x0a,
 	PLDM_FWUP_FD_ABORTED_TRANSFER_LOW_POWER_STATE = 0x0b,
 	PLDM_FWUP_FD_ABORTED_TRANSFER_RESET_NEEDED = 0x0c,
 	PLDM_FWUP_FD_ABORTED_TRANSFER_STORAGE_ISSUE = 0x0d,
@@ -1348,8 +1349,8 @@ int decode_transfer_complete_req(const struct pldm_msg *msg,
 /** @brief Create PLDM response message for TransferComplete
  *
  *  @param[in] instance_id - Message's instance id
- *  @param[in,out] msg - Message will be written to this
  *  @param[in] completion_code - CompletionCode
+ *  @param[in,out] msg - Message will be written to this
  *  @param[in] payload_length - Length of response message payload
  *
  *  @return pldm_completion_codes

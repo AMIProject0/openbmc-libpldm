@@ -44,6 +44,7 @@ enum pldm_firmware_update_commands {
 	PLDM_TRANSFER_COMPLETE = 0x16,
 	PLDM_VERIFY_COMPLETE = 0x17,
 	PLDM_APPLY_COMPLETE = 0x18,
+    PLDM_GET_META_DATA = 0x19,
 	PLDM_ACTIVATE_FIRMWARE = 0x1a,
 	PLDM_GET_STATUS = 0x1b,
 	PLDM_CANCEL_UPDATE_COMPONENT = 0x1c,
@@ -1489,6 +1490,82 @@ int decode_apply_complete_resp(const struct pldm_msg *msg,
                     size_t payload_length,
 					uint8_t *completion_code);
 
+/** @brief Encode a GetMetaData request 
+ * 	
+ * 	@param[in] instance_id - Message's instance_id
+ *  @param[in] payload_length - Length of request message payload
+ * 	@param[in,out] msg - Message will be written to this
+ * 	@param[in] data_transfer_handle - handle that is used to identify a package data transfer
+ *  @param[in] transfer_operation_flag - operation flag that indiates whether this is the start of the transfer
+ * 
+ * 	@return pldm_completion_codes 
+ * 
+ *  @note Caller is responsible for memory alloc and dealloc of param
+ *        'msg.payload'
+*/
+int encode_get_meta_data_req(uint8_t instance_id,
+                        size_t payload_length,
+						struct pldm_msg *msg,
+						uint32_t data_transfer_handle,
+                        uint8_t transfer_operation_flag);
+
+/** @brief Decode a GetMetaData request
+ * 
+ *  @param[in] msg - Request message
+ *  @param[in] payload_length - Length of request message payload
+ * 	@param[out] data_transfer_handle - handle that is used to identify a package data transfer
+ *  @param[out] transfer_operation_flag - operation flag that indiates whether this is the start of the transfer
+ *
+ *  @return pldm_completion_codes 
+*/
+int decode_get_meta_data_req(struct pldm_msg *msg,
+                        size_t payload_length,
+                        uint32_t *data_transfer_handle,
+                        uint8_t *transfer_operation_flag);
+
+/** @brief Encode a GetMetaData response
+ * 
+ * 	@param[in] instance_id - Message's instance_id
+ *  @param[in] payload_length - Length of response message payload
+ * 	@param[in,out] msg - Message will be written to this
+ *  @param[in] completion_code - Pointer to hold the completion code
+ *  @param[in] next_data_transfer_handle - handle that is used to identify the next portion of the transfer
+ *  @param[in] transfer_flag - transfer flag that indiates what part of the transfer this response represents
+ *  @param[in] portion_of_device_meta_data - portion of the firmware device metadata that the UA shall obtain and retain during the firmware
+ *                                           update process
+ * 
+ *  @return pldm_completion_codes
+ * 
+ *  @note Caller is responsible for memory alloc and dealloc of param
+ *        'msg.payload'
+*/
+int encode_get_meta_data_resp(uint8_t instance_id,
+                        size_t payload_length,
+                        struct pldm_msg *msg,
+                        uint8_t completion_code,
+                        uint32_t next_data_transfer_handle,
+                        uint8_t transfer_flag,
+                        const struct variable_field *portion_of_device_meta_data);
+
+/** @brief Decode a GetMetaData response
+ * 
+ * 	@param[in] msg - Response message
+ *  @param[out] completion_code - Pointer to hold the completion code
+ *  @param[out] next_data_transfer_handle - handle that is used to identify the next portion of the transfer
+ *  @param[out] transfer_flag - transfer flag that indiates what part of the transfer this response represents
+ *  @param[out] portion_of_device_meta_data - portion of the firmware device metadata that the UA shall obtain and retain during the firmware
+ *                                            update process
+ * 	@param[in] payload_length - Length of the response message payload
+ * 
+ * 	@return pldm_completion_codes
+*/
+int decode_get_meta_data_resp(struct pldm_msg *msg,
+						uint8_t *completion_code,
+                        uint32_t *next_data_transfer_handle,
+                        uint8_t *transfer_flag,
+						struct variable_field *portion_of_device_meta_data,
+						size_t payload_length);
+
 /** @brief Create PLDM request message for ActivateFirmware
  *
  *  @param[in] instance_id - Message's instance id
@@ -1565,6 +1642,30 @@ int decode_activate_firmware_resp(const struct pldm_msg *msg,
 int encode_get_status_req(uint8_t instance_id, struct pldm_msg *msg,
 			  size_t payload_length);
 
+/** @brief Encode GetStatus response message
+ *
+ *  @param[in] instance_id - Message's instance id
+ *  @param[in,out] msg - Response message
+ *  @param[in] payload_length - Length of response message payload
+ *  @param[in] completion_code - Pointer to completion code
+ *  @param[in] current_state - Pointer to current state machine state
+ *  @param[in] previous_state - Pointer to previous different state machine
+ *                               state
+ *  @param[in] aux_state - Pointer to current operation state of FD/FDP
+ *  @param[in] aux_state_status - Pointer to aux state status
+ *  @param[in] progress_percent - Pointer to progress percentage
+ *  @param[in] reason_code - Pointer to reason for entering current state
+ *  @param[in] update_option_flags_enabled - Pointer to update option flags
+ *                                            enabled
+ *
+ *  @return pldm_completion_codes
+ */
+int encode_get_status_resp(uint8_t instance_id, struct pldm_msg *msg, size_t payload_length,
+                uint8_t completion_code, uint8_t current_state,
+			    uint8_t previous_state, uint8_t aux_state,
+			    uint8_t aux_state_status, uint8_t progress_percent,
+			    uint8_t reason_code,
+			    bitfield32_t update_option_flags_enabled);
 
 /** @brief Decode GetStatus response message
  *
@@ -1605,6 +1706,21 @@ int encode_cancel_update_component_req(uint8_t instance_id,
 				       struct pldm_msg *msg,
 				       size_t payload_length);
 
+/** @brief Encode CancelUpdateComponent response message
+ *
+ *  @param[in] instance_id - Message's instance id
+ *  @param[in,out] msg - Response message
+ *  @param[in] payload_length - Length of response message payload
+ *  @param[in] completion_code - Pointer to the completion code
+ *
+ *  @return pldm_completion_codes
+ */
+int encode_cancel_update_component_resp(uint8_t instance_id,
+				       struct pldm_msg *msg,
+				       size_t payload_length,
+                       uint8_t completion_code);
+
+
 /** @brief Decode CancelUpdateComponent response message
  *
  *  @param[in] msg - Response message
@@ -1630,6 +1746,22 @@ int decode_cancel_update_component_resp(const struct pldm_msg *msg,
  */
 int encode_cancel_update_req(uint8_t instance_id, struct pldm_msg *msg,
 			     size_t payload_length);
+
+/** @brief Encode CancelUpdate response message
+ *
+ *  @param[in] instance_id - Message's instance id
+ *	@param[in,out] msg - Response message
+ *  @param[in] payload_length - Length of response message payload
+ *	@param[in] completion_code - Completion code
+ *	@param[in] non_functioning_component_indication - Non functioning component indication
+ *	@param[in] non_functioning_component_bitmap - Non functioning component bitmap
+ *
+ *	@return pldm_completion_codes
+ */
+int encode_cancel_update_resp(uint8_t instance_id, struct pldm_msg *msg, size_t payload_length,
+			      uint8_t completion_code,
+			      bool8_t non_functioning_component_indication,
+			      bitfield64_t non_functioning_component_bitmap);
 
 /** @brief Decode CancelUpdate response message
  *

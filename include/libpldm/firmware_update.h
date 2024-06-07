@@ -1531,7 +1531,7 @@ int decode_get_meta_data_req(struct pldm_msg *msg,
  *  @param[in] completion_code - Pointer to hold the completion code
  *  @param[in] next_data_transfer_handle - handle that is used to identify the next portion of the transfer
  *  @param[in] transfer_flag - transfer flag that indiates what part of the transfer this response represents
- *  @param[in] portion_of_device_meta_data - portion of the firmware device metadata that the UA shall obtain and retain during the firmware
+ *  @param[in] portion_of_meta_data - portion of the firmware device metadata that the UA shall obtain and retain during the firmware
  *                                           update process
  * 
  *  @return pldm_completion_codes
@@ -1545,7 +1545,7 @@ int encode_get_meta_data_resp(uint8_t instance_id,
                         uint8_t completion_code,
                         uint32_t next_data_transfer_handle,
                         uint8_t transfer_flag,
-                        const struct variable_field *portion_of_device_meta_data);
+                        const struct variable_field *portion_of_meta_data);
 
 /** @brief Decode a GetMetaData response
  * 
@@ -1553,7 +1553,7 @@ int encode_get_meta_data_resp(uint8_t instance_id,
  *  @param[out] completion_code - Pointer to hold the completion code
  *  @param[out] next_data_transfer_handle - handle that is used to identify the next portion of the transfer
  *  @param[out] transfer_flag - transfer flag that indiates what part of the transfer this response represents
- *  @param[out] portion_of_device_meta_data - portion of the firmware device metadata that the UA shall obtain and retain during the firmware
+ *  @param[out] portion_of_meta_data - portion of the firmware device metadata that the UA shall obtain and retain during the firmware
  *                                            update process
  * 	@param[in] payload_length - Length of the response message payload
  * 
@@ -1563,7 +1563,7 @@ int decode_get_meta_data_resp(struct pldm_msg *msg,
 						uint8_t *completion_code,
                         uint32_t *next_data_transfer_handle,
                         uint8_t *transfer_flag,
-						struct variable_field *portion_of_device_meta_data,
+						struct variable_field *portion_of_meta_data,
 						size_t payload_length);
 
 /** @brief Create PLDM request message for ActivateFirmware

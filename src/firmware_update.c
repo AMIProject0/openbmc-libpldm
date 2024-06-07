@@ -2241,7 +2241,7 @@ int encode_get_meta_data_req(uint8_t instance_id,
 	header.instance = instance_id;
 	header.msg_type = PLDM_REQUEST;
 	header.pldm_type = PLDM_FWUP;
-	header.command = PLDM_GET_DEVICE_METADATA;
+	header.command = PLDM_GET_META_DATA;
 	uint8_t rc = pack_pldm_header(&header, &(msg->hdr));
 	if (rc != 0) {
 		return rc;
@@ -2287,7 +2287,7 @@ int encode_get_meta_data_resp(uint8_t instance_id,
                         uint8_t completion_code,
                         uint32_t next_data_transfer_handle,
                         uint8_t transfer_flag,
-                        const struct variable_field *portion_of_device_meta_data)
+                        const struct variable_field *portion_of_meta_data)
 {
 	if (msg == NULL || portion_of_device_meta_data == NULL ||
         portion_of_device_meta_data->ptr == NULL) {
@@ -2311,7 +2311,7 @@ int encode_get_meta_data_resp(uint8_t instance_id,
 	header.instance = instance_id;
 	header.msg_type = PLDM_RESPONSE;
 	header.pldm_type = PLDM_FWUP;
-	header.command = PLDM_GET_DEVICE_METADATA;
+	header.command = PLDM_GET_META_DATA;
 	uint8_t rc = pack_pldm_header(&header, &(msg->hdr));
 	if (rc != 0) {
 		return rc;
@@ -2335,7 +2335,7 @@ int decode_get_meta_data_resp(struct pldm_msg *msg,
 						uint8_t *completion_code,
                         uint32_t *next_data_transfer_handle,
                         uint8_t *transfer_flag,
-						struct variable_field *portion_of_device_meta_data,
+						struct variable_field *portion_of_meta_data,
 						size_t payload_length)
 {
     if (msg == NULL || portion_of_device_meta_data == NULL ||

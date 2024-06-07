@@ -2289,17 +2289,17 @@ int encode_get_meta_data_resp(uint8_t instance_id,
                         uint8_t transfer_flag,
                         const struct variable_field *portion_of_meta_data)
 {
-	if (msg == NULL || portion_of_device_meta_data == NULL ||
-        portion_of_device_meta_data->ptr == NULL) {
+	if (msg == NULL || portion_of_meta_data == NULL ||
+        portion_of_meta_data->ptr == NULL) {
         return PLDM_ERROR_INVALID_DATA;
     }
 
     if (payload_length != sizeof (struct pldm_multipart_transfer_resp) +
-        portion_of_device_meta_data->length) {
+        portion_of_meta_data->length) {
         return PLDM_ERROR_INVALID_LENGTH;
     }
 
-    if (portion_of_device_meta_data->length == 0) {
+    if (portion_of_meta_data->length == 0) {
         return PLDM_ERROR_INVALID_DATA;
     }
 
@@ -2325,7 +2325,7 @@ int encode_get_meta_data_resp(uint8_t instance_id,
     response->transfer_flag = transfer_flag;
 
     memcpy(msg->payload + sizeof (struct pldm_multipart_transfer_resp),
-        portion_of_device_meta_data->ptr, portion_of_device_meta_data->length);
+        portion_of_meta_data->ptr, portion_of_meta_data->length);
 
     return PLDM_SUCCESS;
 }
@@ -2338,8 +2338,8 @@ int decode_get_meta_data_resp(struct pldm_msg *msg,
 						struct variable_field *portion_of_meta_data,
 						size_t payload_length)
 {
-    if (msg == NULL || portion_of_device_meta_data == NULL ||
-        portion_of_device_meta_data->ptr == NULL ||
+    if (msg == NULL || portion_of_meta_data == NULL ||
+        portion_of_meta_data->ptr == NULL ||
         completion_code == NULL ||
         next_data_transfer_handle == NULL ||
         transfer_flag == NULL) {
@@ -2361,8 +2361,8 @@ int decode_get_meta_data_resp(struct pldm_msg *msg,
 	*next_data_transfer_handle = le32toh(response->next_data_transfer_handle);
 	*transfer_flag = response->transfer_flag;
 
-	portion_of_device_meta_data->ptr = (const uint8_t *)(msg->payload + sizeof (struct pldm_multipart_transfer_resp));
-	portion_of_device_meta_data->length = payload_length - sizeof (struct pldm_multipart_transfer_resp);
+	portion_of_meta_data->ptr = (const uint8_t *)(msg->payload + sizeof (struct pldm_multipart_transfer_resp));
+	portion_of_meta_data->length = payload_length - sizeof (struct pldm_multipart_transfer_resp);
 
 	return PLDM_SUCCESS;
 }
